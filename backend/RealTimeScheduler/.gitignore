@@ -1,0 +1,52 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Eclipse IDE
+.project
+.classpath
+.settings/
+
+# Java
+*.class
+*.log
+*.jar
+*.war
+*.ear
+
+# Maven
+target/
+
+# Spring Boot
+spring-boot-devtools.jar
+
+# Application-specific files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDE-specific
+.idea/.idea_modules
+.idea/*.iml
+.idea/modules.xml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dynamic.xml
+
+# Maven Wrapper
+.mvn/
+mvnw
+mvnw.cmd
+
