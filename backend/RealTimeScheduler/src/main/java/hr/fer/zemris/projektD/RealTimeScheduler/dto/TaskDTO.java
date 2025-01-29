@@ -1,26 +1,20 @@
-package hr.fer.zemris.projektD.RealTimeScheduler.model;
-
-import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+package hr.fer.zemris.projektD.RealTimeScheduler.dto;
 
 import java.time.LocalDateTime;
 
-@Document(collection = "tasks")
-public class Task {
+public class TaskDTO {
 
-    @Id
-    private ObjectId id;
+    private String id;
     private String description;
     private LocalDateTime scheduledTime;
-    private String status; // e.g., "PENDING", "COMPLETED", "FAILED"
+    private String status;
 
     // Getters and Setters
-    public ObjectId getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(ObjectId id) {
+    public void setId(String id) {
         this.id = id;
     }
 
