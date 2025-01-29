@@ -1,47 +1,74 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/api';
+import { List, ListItem, ListItemText, IconButton, Grid, Typography, TextField, Button, MenuItem, Select, InputLabel, FormControl, SelectChangeEvent } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface User {
     id: string;
     name: string;
     email: string;
-    role: string;
+    roles: string[]; // Roles must always be an array
 }
 
-const UserList: React.FC = () => {
-    const [users, setUsers] = useState<User[]>([]);
-    const [newUser, setNewUser] = useState<User>({ id: '', name: '', email: '', role: '' });
+const mockRoles = ['User', 'Admin', 'Manager', 'Viewer']; // Mock roles for selection
 
-    // Fetch users
+const UserList: React.FC = () => {
+    const [users, setUsers] = useState<User[]>([]); // List of users
+    const [newUser, setNewUser] = useState<User>({ id: '', name: '', email: '', roles: [] });
+    const [error, setError] = useState<string | null>(null); // Error message
+
+    // Fetch users from the backend
     const fetchUsers = async () => {
         try {
             const response = await api.get<User[]>('/users');
-            setUsers(response.data);
-        } catch (error) {
-            console.error('Error fetching users:', error);
+            const usersWithRoles = response.data.map((user) => ({
+                ...user,
+                roles: user.roles || [], // Default roles to an empty array if undefined
+            }));
+            setUsers(usersWithRoles);
+            setError(null); // Clear any previous error
+        } catch (err) {
+            console.error('Error fetching users:', err);
+            setError('Failed to fetch users. Please try again later.');
         }
     };
 
-    // Create user
+    // Create a new user
     const createUser = async () => {
+        if (!newUser.name || !newUser.email || newUser.roles.length === 0) {
+            setError('Please fill out all fields and add at least one role.');
+            return;
+        }
         try {
             await api.post('/users', newUser);
             fetchUsers(); // Refresh the user list
-        } catch (error) {
-            console.error('Error creating user:', error);
+            setNewUser({ id: '', name: '', email: '', roles: [] }); // Reset the form
+            setError(null); // Clear errors
+        } catch (err) {
+            console.error('Error creating user:', err);
+            setError('Failed to create user. Please try again.');
         }
     };
 
-    // Delete user
+    // Delete a user
     const deleteUser = async (id: string) => {
         try {
             await api.delete(`/users/${id}`);
             fetchUsers(); // Refresh the user list
-        } catch (error) {
-            console.error('Error deleting user:', error);
+            setError(null); // Clear any previous error
+        } catch (err) {
+            console.error('Error deleting user:', err);
+            setError('Failed to delete user. Please try again.');
         }
     };
 
+    // Handle role change in the select dropdown
+    const handleRoleChange = (event: SelectChangeEvent<string[]>) => {
+        const { value } = event.target;
+        setNewUser({ ...newUser, roles: typeof value === 'string' ? value.split(',') : value });
+    };
+
+    // Fetch users on component mount
     useEffect(() => {
         fetchUsers();
     }, []);
@@ -49,31 +76,61 @@ const UserList: React.FC = () => {
     return (
         <div>
             <h1>User List</h1>
-            <ul>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
+            <List>
                 {users.map((user) => (
-                    <li key={user.id}>
-                        {user.name} - {user.email} ({user.role})
-                        <button onClick={() => deleteUser(user.id)}>Delete</button>
-                    </li>
+                    <ListItem key={user.id}>
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid item xs={3}>
+                                <ListItemText primary={user.name} secondary={user.email} />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Typography variant="body2">Roles: {user.roles?.join(', ') || 'No roles assigned'}</Typography>
+                            </Grid>
+                            <Grid item>
+                                <IconButton onClick={() => deleteUser(user.id)}>
+                                    <DeleteIcon />
+                                </IconButton>
+                            </Grid>
+                        </Grid>
+                    </ListItem>
                 ))}
-            </ul>
+            </List>
+
             <h2>Create User</h2>
-            <input
-                placeholder="Name"
+            <TextField
+                label="Name"
+                fullWidth
                 value={newUser.name}
                 onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                margin="normal"
             />
-            <input
-                placeholder="Email"
+            <TextField
+                label="Email"
+                fullWidth
                 value={newUser.email}
                 onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                margin="normal"
             />
-            <input
-                placeholder="Role"
-                value={newUser.role}
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-            />
-            <button onClick={createUser}>Add User</button>
+            <FormControl fullWidth margin="normal">
+                <InputLabel>Roles</InputLabel>
+                <Select
+                    multiple
+                    value={newUser.roles}
+                    onChange={handleRoleChange}
+                    renderValue={(selected) => selected.join(', ')}
+                >
+                    {mockRoles.map((role) => (
+                        <MenuItem key={role} value={role}>
+                            {role}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+            <Button variant="contained" color="primary" onClick={createUser}>
+                Add User
+            </Button>
         </div>
     );
 };
