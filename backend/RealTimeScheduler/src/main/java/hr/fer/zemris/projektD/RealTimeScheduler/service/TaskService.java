@@ -16,11 +16,13 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
+    private final EmailService emailService;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
+    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper, EmailService emailService) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
+        this.emailService = emailService;
     }
 
     public List<TaskDTO> getAllTasks() {
@@ -38,6 +40,11 @@ public class TaskService {
     public TaskDTO createTask(TaskDTO taskDTO) {
         Task task = taskMapper.toEntity(taskDTO);
         Task savedTask = taskRepository.save(task);
+
+        // Send email after task creation
+        String customerEmail = "t.serezlija@gmail.com";  // Replace with real email
+        emailService.sendTaskCreationEmail(customerEmail, savedTask.getDescription());
+
         return taskMapper.toDTO(savedTask);
     }
 
