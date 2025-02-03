@@ -32,6 +32,3 @@ out/
 
 # Logs
 *.log
-
-# Firebase
-.firebase/
