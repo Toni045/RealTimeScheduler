@@ -1,37 +1,28 @@
-// src/api/api.js
 import axios from 'axios';
-import { useAuth0 } from '@auth0/auth0-react';
+import { getToken } from './authService';
 
-const API_BASE_URL = 'http://localhost:8080/api'; // Backend URL
-
-// Create an axios instance
 const api = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: 'http://localhost:8080/api',
     headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
     },
+    withCredentials: true,
 });
 
-// Add a request interceptor to include the token dynamically
-api.interceptors.request.use(
-    async (config) => {
-        // Get the token dynamically using useAuth0
-        const { getAccessTokenSilently } = useAuth0();
-        try {
-            const token = await getAccessTokenSilently();
-            if (token) {
-                // Add the Authorization header
-                config.headers['Authorization'] = `Bearer ${token}`;
-            }
-        } catch (error) {
-            console.error('Error getting token:', error);
+// ✅ Add token dynamically before each request
+api.interceptors.request.use(async (config) => {
+    try {
+        const token = await getToken();
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+            console.log('✅ Authorization Header Set:', config.headers['Authorization']);
         }
-
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+    } catch (error) {
+        console.error('⚠️ Error getting token:', error);
     }
-);
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
 
 export default api;

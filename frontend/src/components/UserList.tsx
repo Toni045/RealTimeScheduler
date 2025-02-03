@@ -1,7 +1,10 @@
+// src/components/UserList.tsx
 import React, { useEffect, useState } from 'react';
-import api from '../api/api';
 import { List, ListItem, ListItemText, IconButton, Grid, Typography, TextField, Button, MenuItem, Select, InputLabel, FormControl, SelectChangeEvent } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import {useAuth0} from "@auth0/auth0-react";
+import api from "../api/api";
+
 
 interface User {
     id: string;
@@ -13,6 +16,7 @@ interface User {
 const mockRoles = ['User', 'Admin', 'Manager', 'Viewer']; // Mock roles for selection
 
 const UserList: React.FC = () => {
+    const { getAccessTokenSilently } = useAuth0();
     const [users, setUsers] = useState<User[]>([]); // List of users
     const [newUser, setNewUser] = useState<User>({ id: '', name: '', email: '', roles: [] });
     const [error, setError] = useState<string | null>(null); // Error message

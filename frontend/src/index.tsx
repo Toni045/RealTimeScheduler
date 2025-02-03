@@ -19,8 +19,9 @@ root.render(
         domain={domain}
         clientId={clientId}
         authorizationParams={{
-            redirect_uri: window.location.origin,
-            scope: 'openid profile email',
+            redirect_uri: 'http://localhost:3000',
+            audience: 'http://localhost:8080/api',
+            scope: "read:messages write:messages"
         }}
         useRefreshTokens={true}
         cacheLocation="localstorage"
@@ -30,5 +31,4 @@ root.render(
             <App />
         </Router>
     </Auth0Provider>
-
 );
